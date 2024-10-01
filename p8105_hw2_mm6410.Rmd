@@ -16,6 +16,8 @@ I loaded necessary packages (e.g. `tidyverse` and `dplyr`).
 
 ## Problem 1
 
+I will import the NYC Transit Subway Dataset.
+
 ```{r}
 subway_df = read_csv(
   file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
@@ -25,9 +27,68 @@ subway_df = read_csv(
   mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 ```
 
-The data has 1,868 observations and 19 variables. The variables include line, station name, station longitude/latitude, routes 1-11, entry and entrance type, vending, and ADA compliance. 
+The dataset has 1,868 observations and 19 variables (1,868 x 19). The variables include line, station name, station longitude/latitude, routes 1-11, entry and entrance type, vending, and ADA compliance. 
 
 To clean the data, the CSV data file was imported, missing values were excluded, and the variable names were cleaned such that they were all lowercase. I selected only the variables listed above and changed the "entry" column so that YES/NO character values were converted to TRUE/FALSE logistic values.
+
+The current dataset is not tidy. For example, the routes (1-11) can be condensed into two separate columns: `route_name` and `route_number`.
+
+
+```{r}
+distinct(subway_df, station_name, line) |> 
+  nrow()
+
+filter(subway_df, ada == TRUE) |> 
+  nrow()
+
+filter(subway_df, vending == "NO") |> 
+  summarize(mean(entry)) |> 
+  pull()
+```
+
+Using the code above, we see that there are:
+
+*  465 distinct stations - identified by name and line
+*  468 stations are ADA compliant
+*  37.7% of stations entrances/exits without vending allow entrance
+
+
+The code below will now reformat data to create route_number and route_name columns:
+
+```{r}
+subway_df = read_csv(
+  file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+  na = c(".", "NA", "")) |> 
+  janitor::clean_names() |> 
+  select(line:entry, vending, ada) |> 
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE)) |>
+  mutate(across(starts_with("route"), as.character))
+
+subway_tidy_df = 
+  pivot_longer(
+    subway_df,
+    cols = starts_with("route"),
+    names_to = "route_number",
+    values_to = "route_name",
+    values_drop_na = TRUE
+  )
+```
+
+```{r}
+filter(
+  subway_tidy_df, route_name == "A") |> 
+  nrow()
+
+filter(
+  subway_tidy_df, route_name == "A" & ada == TRUE) |> 
+  distinct(station_name, line) |> 
+  nrow()
+```
+
+Using this tidy subway dataset, we can now show that:
+
+* There are 273 distinct subway stations that serve the A train.
+* Of the stations that serve the A train, there are 17 that are ADA compliant.
 
 
 
