@@ -1,0 +1,29 @@
+---
+title: "P8105 HW2"
+author: "Mahdi Maktabi - mm6410"
+date: 2024-10-01
+output: github_document
+---
+
+```{r setup, echo = FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+```
+
+This document is P8105 Homework 2.
+
+I loaded necessary packages (e.g. `tidyverse` and `dplyr`). 
+
+## Problem 1
+
+```{r}
+subway_df = read_csv(
+  file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+  na = c(".", "NA", "")) |> 
+  janitor::clean_names() |> 
+  select(line:entry, vending, ada) |> 
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
+```
+
+
+
