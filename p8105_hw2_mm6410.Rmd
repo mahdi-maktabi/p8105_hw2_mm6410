@@ -7,6 +7,7 @@ output: github_document
 
 ```{r setup, echo = FALSE, message=FALSE}
 library(tidyverse)
+library(readxl)
 library(dplyr)
 ```
 
@@ -18,7 +19,7 @@ I loaded necessary packages (e.g. `tidyverse` and `dplyr`).
 
 I will import the NYC Transit Subway Dataset.
 
-```{r}
+```{r, message=FALSE}
 subway_df = read_csv(
   file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
   na = c(".", "NA", "")) |> 
@@ -55,7 +56,7 @@ Using the code above, we see that there are:
 
 The code below will now reformat data to create route_number and route_name columns:
 
-```{r}
+```{r, message=FALSE}
 subway_df = read_csv(
   file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
   na = c(".", "NA", "")) |> 
@@ -74,7 +75,7 @@ subway_tidy_df =
   )
 ```
 
-```{r}
+```{r, message=FALSE}
 filter(
   subway_tidy_df, route_name == "A") |> 
   nrow()
@@ -91,4 +92,44 @@ Using this tidy subway dataset, we can now show that:
 * Of the stations that serve the A train, there are 17 that are ADA compliant.
 
 
+## Problem 2
+
+I will import, clean, and merge the datasets: `Mr Trash Wheel`, `Professor Trash Wheel`, and `Gwynnda Trash Wheel`, into a single dataset called `trash_wheel_df`.
+
+```{r merging_datasets, message=FALSE}
+mr_trash_wheel_df = 
+  read_excel("data/202409 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", na = c(".", "NA", "")) |> 
+  janitor::clean_names() |> 
+  select(dumpster:homes_powered) |> 
+  slice(1:651) |> 
+  mutate(
+    sports_balls = as.integer(round(sports_balls)),
+    homes_powered = as.double(round(homes_powered)),
+    year = as.numeric(year),
+    name = "mr_trash_wheel"
+    )
+
+professor_tw_df =
+  read_excel("data/202409 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", na = c(".", "NA", "")) |>
+  janitor::clean_names() |> 
+  slice(1:118) |> 
+  mutate(
+    homes_powered = as.double(round(homes_powered)),
+    name = "professor_tw"
+    )
+
+gwynnda_tw_df = 
+  read_excel("data/202409 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", na = c(".", "NA", "")) |>
+  janitor::clean_names() |> 
+  slice(1:263) |> 
+  mutate(
+    homes_powered = as.double(round(homes_powered)),
+    name = "gwynnda_tw"
+    )
+
+trash_wheel_df = 
+  bind_rows(mr_trash_wheel_df, professor_tw_df, gwynnda_tw_df) |> 
+  janitor::clean_names() |> 
+  relocate(dumpster, name)
+```
 
