@@ -133,3 +133,25 @@ trash_wheel_df =
   relocate(dumpster, name)
 ```
 
+The merged dataset has 1,032 observations and 15 columns. The variable names were cleaned, changed to the appropriate variable type, and excluded any values that were not related to Trash Wheel. Also, I added an additional variable `name` which will indicate which dataset the data came from.
+
+
+```{r, message=FALSE}
+total_weight_professor = 
+  trash_wheel_df |> 
+  filter(name == "professor_tw") |> 
+  summarize(total_weight = sum(weight_tons, na.rm = TRUE))
+
+cig_butts_gwynnda_june_2022 = 
+  trash_wheel_df |> 
+  filter(
+    name == "gwynnda_tw", 
+    year == 2022, 
+    month == "June") |> 
+  summarize(total_cigarette_butts = sum(cigarette_butts, na.rm = TRUE))
+```
+
+* Total weight of trash collected by Professor TW = 247
+* Total number of cigarette butts collected by Gwynnda in June 2022 = 18,120 cigarette butts
+
+
