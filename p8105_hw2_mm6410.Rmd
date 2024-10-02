@@ -178,6 +178,17 @@ results = read_csv("data/gbb_datasets/results.csv",
   janitor::clean_names() |> 
   rename(baker_first_name = baker)
 
+viewers = read_csv("data/gbb_datasets/viewers.csv", na = c(".", "NA", "")) |> 
+  janitor::clean_names()
+  pivot_longer(
+    viewers,
+    cols = starts_with("series"),
+    names_to = "series",
+    values_to = "series_views") |> 
+  mutate(series = str_remove(series, "series_"),
+         series = as.numeric(series)) |> 
+  relocate(series)
+  
 
 ```
 
